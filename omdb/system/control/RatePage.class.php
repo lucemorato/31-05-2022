@@ -1,0 +1,60 @@
+<?php
+/**
+* @author Katija Jurić i Lucija Mikulić
+* @copyright 2022
+*/
+
+
+
+require_once('./system/util/Api.class.php');
+require_once('./system/util/UserId.class.php');
+require_once('./system/util/Movie.class.php');
+
+
+
+class RatePage extends AbstractPage {
+
+
+
+public $ime;
+public $idfilma;
+public $zanr;
+public $godina;
+public $rate;
+public $userid;
+
+
+
+
+public function code() {
+
+
+
+    $user = new UserId($_GET['name'], $_GET['password']);
+    $movieId = new Movie($_GET['moviename']);
+    $moviename = $_GET['moviename'];
+    $rate = $_GET['rate'];
+
+    $movie = Api::getOmdbRecordByTitle($moviename,APIKEY);
+    $movieArray = json_decode(json_encode($movie, JSON_FORCE_OBJECT), JSON_PRETTY_PRINT);
+
+    $sql = "INSERT INTO movies(title, year, genre) VALUES ('".$movieArray['Title']."','".$movieArray['Year']."','".$movieArray['Genre']."')";
+    AppCore::getDB()->sendQuery($sql);
+
+    $sqlQuery = "INSERT INTO rates(rate,user_id,movie_id) VALUES ('".$rate."','".$user->userid."','".$movieId->movie_id."')";
+    // AppCore::getDB()->sendQuery($sqlQuery);
+    // echo "Film spremljen.";
+
+
+    $this->templateName = 'rate';
+    $this->v['resursi'] = [
+    $this->ime = $movieArray['Title'],
+    $this->idfilma = $movieArray['imdbID'],
+    $this->zanr = $movieArray['Genre'],
+    $this->godina = $movieArray['Year'],
+    ];
+    }
+
+
+
+}
